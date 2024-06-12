@@ -8,6 +8,10 @@
     <title>Attendance orders</title>
     <!-- Styles -->
     <style>
+        body {
+            background: linear-gradient(to bottom, #d8f4fd, #ffffff) no-repeat; /* Change colors as needed */
+        }
+
         * {
             direction: rtl;
         }
@@ -16,17 +20,86 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: 22px;
+        }
+
+        th, td {
+            text-align: center;
+        }
+
+        /*!* Custom checkbox style *!
+        .custom-checkbox {
+            display: inline-block;
+            width: 20px; !* Set width *!
+            height: 20px; !* Set height *!
+            border: 2px solid #d10909; !* Set border color *!
+            border-radius: 5px; !* Set border radius *!
+            position: relative;
+        }
+
+        !* Hide default checkbox *!
+        .custom-checkbox input[type="checkbox"] {
+            opacity: 0;
+        }
+
+        !* Checkmark *!
+        .custom-checkbox::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px; !* Set checkmark size *!
+            height: 12px; !* Set checkmark size *!
+            background-color: #ff0c0c; !* Set checkmark color *!
+            border-radius: 2px; !* Set checkmark border radius *!
+            display: none;
+        }
+
+        !* Show checkmark when checkbox is checked *!
+        .custom-checkbox input[type="checkbox"]:checked ::before {
+            display: block;
+        }*/
+
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        /* Style the custom radio button */
+        input[type="checkbox"]::before {
+            content: "";
+            display: inline-block;
+            border-radius: 4px;
+
+            width: 20px; /* Adjust the width as needed */
+            height: 20px; /* Adjust the height as needed */
+            border: 2px solid #374C70; /* Border color */
+            /*background-color: #374C70; !* Background color when not checked *!*/
+            margin-right: 8px; /* Adjust spacing between the bullet and label */
+        }
+
+        input[type="checkbox"]:checked::before {
+            background-color: #00B6E6; /* Background color when checked */
+            border-color: #00B6E6; /* Border color when checked */
         }
     </style>
 </head>
 <body>
-<h2>طلبات الحظور</h2>
+<h2 style="display: flex; justify-content: center;">طلبات الحظور</h2>
 
 <div class="align-content-center center-div">
-    <div>
-        <label for="">اضافة وجبة جديدة</label>
-        <input id="new_item" type="text">
-        <button id="add_btn">اضافة</button>
+    <div class="form-group text-center">
+        <input type="text" id="new_item" class="form-control" placeholder="أدخل وجبة جديدة">
+        <button id="add_btn" class="btn btn-primary mt-2">Add</button>
+    </div>
+</div>
+
+<div class="align-content-center center-div">
+    <div class="form-group text-center">
+        <input type="text" id="new_person" class="form-control" placeholder="اضافة شخص جديد">
+        <button id="add_new_person_btn" class="btn btn-primary mt-2">Add</button>
     </div>
 </div>
 
@@ -43,9 +116,10 @@
             <th scope="col">علي وردي</th>
             <th scope="col">محمدعلي</th>
             <th scope="col">حيدر</th>
-            <th scope="col">سجاد</th>
             <th scope="col">حسن</th>
-            <th scope="col">المجموع</th>
+            <th scope="col">العدد الكلي</th>
+            <th scope="col">السعر</th> <!-- New column for item price -->
+            <th scope="col">السعر الإجمالي</th> <!-- New column for total price -->
         </tr>
         </thead>
         <tbody>
@@ -156,6 +230,11 @@
         </tbody>
     </table>
 
+    <!-- Label to display total price -->
+    <div>
+        <label for="total_price">السعر الإجمالي للعناصر المحددة:</label>
+        <span id="total_price_lbl">0</span>
+    </div>
 </div>
 
 {{--<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>--}}
@@ -163,22 +242,29 @@
     var addButton = document.getElementById("add_btn")
     var newItem = document.getElementById("new_item")
     var table = document.getElementById("item_table").getElementsByTagName('tbody')[0];
-    var items = ["كباب", "تمن و فاصوليا", "تمن و بتيتا", "وجبة تمن و كباب", "وجبة كص", "برياني", "محشي برياني", "شاورما على التمن"];
+    var totalPriceLabel = document.getElementById("total_price_lbl");
+
+    var items = ["كباب", "مقلوبة", "تمن و فاصوليا", "تمن و بتيتا", "وجبة تمن و كباب", "وجبة كص", "شاورما دجاج", "برياني", "محشي بيذنجان", "شاورما على التمن"];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        attachCheckboxListeners();
+    });
 
     function createRow(item) {
         var row = '<tr>' +
             '<th scope="row">' + item + '</th>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
-            '<td><input type="checkbox" class="meal-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
+            '<td><input type="checkbox" class="meal-checkbox custom-checkbox" name="' + item + '"></td>' +
             '<td><input class="total-count" value="0" type="number" name="' + item + '"></td>' +
+            '<td><input type="text" class="price" name="' + item + '" value="2000"></td>' + <!-- New column for item price -->
+            '<td><input data-price="' + item + '" class="total-price" value="0" type="text" name="' + item + '"></td>' +
             '</tr>';
         return row;
     }
@@ -190,24 +276,24 @@
 
     function attachCheckboxListeners() {
         var rows = table.querySelectorAll('tr');
-        rows.forEach(function(row) {
+        rows.forEach(function (row) {
             var checkboxes = row.querySelectorAll('.meal-checkbox');
-            checkboxes.forEach(function(checkbox) {
-                checkbox.addEventListener('change', function() {
+            checkboxes.forEach(function (checkbox) {
+                checkbox.addEventListener('change', function () {
                     updateTotalCount(row);
+                    updateTotalPrice(row);
+                    updateTotalPriceLbl();
                 });
             });
         });
     }
-
-    attachCheckboxListeners();
 
     function updateTotalCount(row) {
         var checkboxes = row.querySelectorAll('.meal-checkbox');
         var totalCount = row.querySelector('.total-count');
         var count = 0;
 
-        checkboxes.forEach(function(checkbox) {
+        checkboxes.forEach(function (checkbox) {
             if (checkbox.checked) {
                 count += 1;
             }
@@ -215,6 +301,34 @@
 
         totalCount.value = /*parseInt(totalCount.value) +*/ count;
     }
+
+    function updateTotalPrice(row) {
+        var checkboxes = row.querySelectorAll('.meal-checkbox');
+        var priceInput = row.querySelector('.price');
+        var totalPriceInput = row.querySelector('.total-price');
+        var totalPrice = 0;
+
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                totalPrice += parseFloat(priceInput.value);
+            }
+        });
+        totalPriceInput.value = totalPrice;
+    }
+
+    function updateTotalPriceLbl() {
+        var totalPrice = 0;
+        var totalPriceInputs = document.querySelectorAll('.total-price');
+
+        totalPriceInputs.forEach(function (totalPriceInput) {
+            console.log(totalPriceInput.getAttribute('data-price'))
+            var price = parseFloat(totalPriceInput.getAttribute('data-price')) || 0;
+            totalPrice += price;
+        });
+
+        totalPriceLabel.textContent = totalPrice.toFixed(2);
+    }
+
 
     addButton.addEventListener('click', function () {
         var newItemValue = newItem.value.trim();
@@ -243,8 +357,6 @@
             }
         }
     });
-
-
 
 </script>
 </body>
